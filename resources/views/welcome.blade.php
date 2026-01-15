@@ -25,7 +25,10 @@ use App\Models\Setting;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
     <style>
-        html { scroll-behavior: smooth; }
+        html { 
+            scroll-behavior: smooth; 
+            scroll-padding-top: 80px; /* Offset for fixed header */
+        }
         
         /* Font styles for different languages */
         .font-en {
@@ -49,6 +52,19 @@ use App\Models\Setting;
         html[lang="bn"] {
             font-variant-numeric: bengali;
         }
+        
+        /* Smooth scroll for anchor links */
+        a[href^="#"] {
+            scroll-margin-top: 80px;
+        }
+        
+        /* Text truncation utilities */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
     
     <script>
@@ -56,6 +72,33 @@ use App\Models\Setting;
             const menu = document.getElementById('mobileMenu');
             menu.classList.toggle('hidden');
         }
+        
+        // Enhanced smooth scrolling for anchor links
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle all anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        const headerOffset = 80;
+                        const elementPosition = target.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Close mobile menu if open
+                        const mobileMenu = document.getElementById('mobileMenu');
+                        if (!mobileMenu.classList.contains('hidden')) {
+                            toggleMobileMenu();
+                        }
+                    }
+                });
+            });
+        });
     </script>
 </head>
 
@@ -204,27 +247,27 @@ use App\Models\Setting;
     <div class="max-w-7xl mx-auto px-6 text-center">
         <p class="text-indigo-600 text-sm">{{ Setting::get('packages_subtitle', __('messages.packages_subtitle')) }}</p>
         <h2 class="text-3xl font-bold mt-2">{{ Setting::get('packages_title', __('messages.packages_title')) }}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mt-12">
             @forelse($packages ?? [] as $pkg)
-                <div class="border rounded-2xl p-8 hover:shadow-xl transition text-left bg-white">
+                <div class="border rounded-2xl p-6 hover:shadow-xl transition text-left bg-white h-full flex flex-col">
                     <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <h3 class="font-semibold text-lg leading-tight">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg leading-tight truncate">
                                 {{ $pkg->name ?? 'Package' }}
                             </h3>
                             <div class="mt-2 flex flex-wrap gap-2">
                                 @if(!empty($pkg->type_label))
-                                    <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 flex-shrink-0">
                                         {{ $pkg->type_label }}
                                     </span>
                                 @endif
                                 @if($loop->first)
-                                    <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-600 text-white">{{ __('messages.popular') }}</span>
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-600 text-white flex-shrink-0">{{ __('messages.popular') }}</span>
                                 @endif
                             </div>
                         </div>
 
-                        <div class="text-right">
+                        <div class="text-right flex-shrink-0">
                             <div class="text-2xl font-bold text-indigo-600">
                                 ৳{{ number_format((float)($pkg->price ?? 0)) }}
                             </div>
@@ -233,33 +276,33 @@ use App\Models\Setting;
                     </div>
 
                     <div class="mt-6">
-                        <div class="text-3xl font-bold text-gray-900">
+                        <div class="text-2xl font-bold text-gray-900 truncate">
                             {{ $pkg->speed_label ?? ((int)($pkg->download_speed ?? 0)).'Mbps/'.((int)($pkg->upload_speed ?? 0)).'Mbps' }}
                         </div>
                         <div class="text-sm text-gray-500 mt-1">{{ __('messages.download_upload') }}</div>
                     </div>
 
                     @if(!empty($pkg->description))
-                        <p class="text-sm text-gray-600 mt-4">{{ $pkg->description }}</p>
+                        <p class="text-sm text-gray-600 mt-4 line-clamp-2">{{ $pkg->description }}</p>
                     @endif
 
-                    <ul class="mt-6 space-y-2 text-sm text-gray-700">
+                    <ul class="mt-6 space-y-2 text-sm text-gray-700 flex-grow">
                         <li class="flex items-center gap-2">
-                            <span class="text-indigo-600"><i class="fas fa-download"></i></span>
-                            <span>{{ __('messages.download') }}: {{ (int)($pkg->download_speed ?? 0) }} Mbps</span>
+                            <span class="text-indigo-600 flex-shrink-0"><i class="fas fa-download"></i></span>
+                            <span class="truncate">{{ __('messages.download') }}: {{ (int)($pkg->download_speed ?? 0) }} Mbps</span>
                         </li>
                         <li class="flex items-center gap-2">
-                            <span class="text-indigo-600"><i class="fas fa-upload"></i></span>
-                            <span>{{ __('messages.upload') }}: {{ (int)($pkg->upload_speed ?? 0) }} Mbps</span>
+                            <span class="text-indigo-600 flex-shrink-0"><i class="fas fa-upload"></i></span>
+                            <span class="truncate">{{ __('messages.upload') }}: {{ (int)($pkg->upload_speed ?? 0) }} Mbps</span>
                         </li>
                         <li class="flex items-center gap-2">
-                            <span class="text-indigo-600"><i class="fas fa-calendar-day"></i></span>
-                            <span>{{ __('messages.validity') }}: {{ (int)($pkg->validity_days ?? 30) }} {{ __('messages.days') }}</span>
+                            <span class="text-indigo-600 flex-shrink-0"><i class="fas fa-calendar-day"></i></span>
+                            <span class="truncate">{{ __('messages.validity') }}: {{ (int)($pkg->validity_days ?? 30) }} {{ __('messages.days') }}</span>
                         </li>
                     </ul>
 
                     <a href="{{ route('login') }}"
-                       class="mt-6 w-full inline-block text-center bg-indigo-600 text-white py-2.5 rounded-xl hover:bg-indigo-700 transition">
+                       class="mt-6 w-full inline-block text-center bg-indigo-600 text-white py-2.5 rounded-xl hover:bg-indigo-700 transition flex-shrink-0">
                         {{ __('messages.get_started') }}
                     </a>
                 </div>

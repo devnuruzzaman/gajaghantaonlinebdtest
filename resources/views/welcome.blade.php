@@ -3,11 +3,16 @@ use App\Models\Setting;
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <title>{{ Setting::get('site_name', 'Gajaghanta Online') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Google Fonts for Bangla support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     @if(Setting::get('favicon'))
         <link rel="icon" href="{{ asset(Setting::get('favicon')) }}">
@@ -21,6 +26,29 @@ use App\Models\Setting;
 
     <style>
         html { scroll-behavior: smooth; }
+        
+        /* Font styles for different languages */
+        .font-en {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .font-bn {
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+        
+        /* Auto font selection based on language */
+        html[lang="bn"] body {
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+        
+        html[lang="en"] body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Ensure Bangla numbers display correctly */
+        html[lang="bn"] {
+            font-variant-numeric: bengali;
+        }
     </style>
     
     <script>
